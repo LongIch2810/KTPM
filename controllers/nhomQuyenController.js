@@ -3,6 +3,8 @@ const {
   removeService,
   selectService,
   updateService,
+  selectAllService,
+  selectByNameService,
 } = require("../services/nhomQuyenService");
 
 const insert = async (req, res) => {
@@ -35,6 +37,15 @@ const select = async (req, res) => {
     });
   return res.status(data.status).json({ message: data.message });
 };
+const selectByName = async (req, res) => {
+  const { tennhomquyen } = req.query;
+  if (!tennhomquyen)
+    return res.status(400).json({ message: "Vui lòng nhập tên nhóm quyền" });
+  const data = await selectByNameService({ tennhomquyen });
+  if (data.status === 200)
+    return res.status(data.status).json({ results: data.results });
+  return res.status(data.status).json({ message: data.message });
+};
 
 const update = async (req, res) => {
   const { id } = req.query;
@@ -46,7 +57,7 @@ const update = async (req, res) => {
   const { tenNhomQuyen, danhSachChiTietQuyen } = req.body;
   if (tenNhomQuyen === "" || !tenNhomQuyen)
     return res.status(400).json({ message: "Tên nhóm quyền không được trống" });
-  else if (danhSachChiTietQuyen.length === 0 || !danhSachChiTietQuyen)
+  else if (danhSachChiTietQuyen?.length === 0 || !danhSachChiTietQuyen)
     return res
       .status(400)
       .json({ message: "Vui lòng chọn 1 trong các thao tác quản lý" });
@@ -54,4 +65,14 @@ const update = async (req, res) => {
   return res.status(data.status).json({ message: data.message });
 };
 
-module.exports = { insert, remove, select, update };
+const selectAll = async (req, res) => {
+  const data = await selectAllService();
+
+  if (data.status === 200) {
+    return res.status(data.status).json(data.results);
+  }
+
+  return res.status(data.status).json({ message: data.message });
+};
+
+module.exports = { insert, remove, select, update, selectByName, selectAll };

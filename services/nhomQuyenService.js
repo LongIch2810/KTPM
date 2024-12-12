@@ -5,7 +5,7 @@ const { insertCTQuyen, updateCTQuyen } = require("./chiTietQuyenService");
 const insertService = async ({ tenNhomQuyen, danhSachChiTietQuyen }) => {
   try {
     const [nhomquyen, nhomquyenfields] = await connection.query(
-      "SELECT * FROM quanlikhohang.nhomquyen WHERE tennhomquyen=?",
+      "SELECT * FROM quanlikhohang.nhomquyen WHERE tennhomquyen=? AND trangthai=1",
       [tenNhomQuyen]
     );
     if (nhomquyen.length > 0)
@@ -25,8 +25,6 @@ const insertService = async ({ tenNhomQuyen, danhSachChiTietQuyen }) => {
       item.manhomquyen = newNhomQuyen[0].manhomquyen;
     });
 
-    console.log(danhSachChiTietQuyen);
-
     await insertCTQuyen({ danhSachChiTietQuyen });
     return { status: 200, message: "Thêm nhóm quyền thành công" };
   } catch (error) {
@@ -38,7 +36,7 @@ const insertService = async ({ tenNhomQuyen, danhSachChiTietQuyen }) => {
 const updateService = async ({ id, tenNhomQuyen, danhSachChiTietQuyen }) => {
   try {
     const [nhomquyen, nhomquyenfields] = await connection.query(
-      "SELECT * FROM quanlikhohang.nhomquyen WHERE tennhomquyen=? AND manhomquyen!=?",
+      "SELECT * FROM quanlikhohang.nhomquyen WHERE tennhomquyen=? AND manhomquyen!=? AND trangthai=1",
       [tenNhomQuyen, id]
     );
     if (nhomquyen.length > 0)
@@ -74,15 +72,14 @@ const removeService = async ({ id }) => {
 const selectService = async ({ id }) => {
   try {
     const [results, fields] = await connection.query(
-      "SELECT * FROM quanlikhohang.nhomquyen WHERE manhomquyen=?",
+      "SELECT * FROM quanlikhohang.nhomquyen WHERE manhomquyen=? AND trangthai=1",
       [id]
     );
     let [danhSachChiTietQuyen] = await connection.query(
       "SELECT * FROM quanlikhohang.ctquyen WHERE manhomquyen=?",
       [id]
     );
-    if (results && danhSachChiTietQuyen) {
-      console.log(results);
+    if (results.length > 0 && danhSachChiTietQuyen) {
       const tenNhomQuyen = results[0].tennhomquyen;
       danhSachChiTietQuyen = danhSachChiTietQuyen.map((item) => {
         if (item.manhomquyen === Number(id)) {
@@ -100,4 +97,38 @@ const selectService = async ({ id }) => {
   }
 };
 
-module.exports = { insertService, updateService, removeService, selectService };
+const selectByNameService = async ({ tennhomquyen }) => {
+  try {
+    const [results, fields] = await connection.query(
+      "SELECT * FROM quanlikhohang.nhomquyen WHERE tennhomquyen COLLATE utf8mb4_general_ci LIKE ? AND trangthai = 1",
+      [`%${tennhomquyen}%`]
+    );
+    return { status: 200, results };
+  } catch (error) {
+    console.log(error);
+    return { status: 500, message: error.message };
+  }
+};
+
+const selectAllService = async () => {
+  try {
+    const [results] = await connection.query(
+      "SELECT * FROM quanlikhohang.nhomquyen WHERE trangthai=1"
+    );
+
+    return { status: 200, results };
+  } catch (error) {
+    // Xử lý lỗi nếu có
+    console.log(error);
+    return { status: 500, message: error.message };
+  }
+};
+
+module.exports = {
+  insertService,
+  updateService,
+  removeService,
+  selectService,
+  selectByNameService,
+  selectAllService,
+};
