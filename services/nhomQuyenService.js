@@ -4,13 +4,6 @@ const { insertCTQuyen, updateCTQuyen } = require("./chiTietQuyenService");
 //them
 const insertService = async ({ tenNhomQuyen, danhSachChiTietQuyen }) => {
   try {
-    const [nhomquyen, nhomquyenfields] = await connection.query(
-      "SELECT * FROM quanlikhohang.nhomquyen WHERE tennhomquyen=?",
-      [tenNhomQuyen]
-    );
-
-    if (nhomquyen.length > 0)
-      return { status: 400, message: "Nhóm quyền đã tồn tại" };
     const [results, fields] = await connection.query(
       "INSERT INTO quanlikhohang.nhomquyen (tennhomquyen,trangthai) VALUES (?,1)",
       [tenNhomQuyen]
@@ -37,14 +30,6 @@ const insertService = async ({ tenNhomQuyen, danhSachChiTietQuyen }) => {
 
 const updateService = async ({ id, tenNhomQuyen, danhSachChiTietQuyen }) => {
   try {
-    const [nhomquyen, nhomquyenfields] = await connection.query(
-      "SELECT * FROM quanlikhohang.nhomquyen WHERE tennhomquyen=? AND manhomquyen!=?",
-      [tenNhomQuyen, id]
-    );
-
-    if (nhomquyen.length > 0)
-      return { status: 400, message: "Nhóm quyền đã tồn tại" };
-
     const [results, fields] = await connection.query(
       "UPDATE quanlikhohang.nhomquyen SET tennhomquyen=? WHERE manhomquyen=?",
       [tenNhomQuyen, id]
