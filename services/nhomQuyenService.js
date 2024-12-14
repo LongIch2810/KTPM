@@ -58,6 +58,13 @@ const updateService = async ({ id, tenNhomQuyen, danhSachChiTietQuyen }) => {
 const removeService = async ({ id }) => {
   if (!id) return { status: 400, message: "Vui lòng chọn nhóm quyền" };
   try {
+    const [nhomquyen] = await connection.query(
+      "SELECT * FROM quanlikhohang.nhomquyen WHERE manhomquyen = ?",
+      [id]
+    );
+    if (nhomquyen.length === 0) {
+      return { status: 400, message: "Nhóm quyền không tồn tại" };
+    }
     const [results, fields] = await connection.query(
       "UPDATE quanlikhohang.nhomquyen SET trangthai=0 WHERE manhomquyen=?",
       [id]
@@ -110,6 +117,19 @@ const selectByNameService = async ({ tennhomquyen }) => {
   }
 };
 
+const selectByIdService = async ({ id }) => {
+  try {
+    const [results, fields] = await connection.query(
+      "SELECT * FROM quanlikhohang.nhomquyen WHERE manhomquyen=? AND trangthai = 1",
+      [id]
+    );
+    return { status: 200, results };
+  } catch (error) {
+    console.log(error);
+    return { status: 500, message: error.message };
+  }
+};
+
 const selectAllService = async () => {
   try {
     const [results] = await connection.query(
@@ -131,4 +151,5 @@ module.exports = {
   selectService,
   selectByNameService,
   selectAllService,
+  selectByIdService,
 };

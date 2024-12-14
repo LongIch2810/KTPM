@@ -5,6 +5,7 @@ const {
   updateService,
   selectAllService,
   selectByNameService,
+  selectByIdService,
 } = require("../services/nhomQuyenService");
 
 const insert = async (req, res) => {
@@ -39,8 +40,6 @@ const select = async (req, res) => {
 };
 const selectByName = async (req, res) => {
   const { tennhomquyen } = req.query;
-  if (!tennhomquyen)
-    return res.status(400).json({ message: "Vui lòng nhập tên nhóm quyền" });
   const data = await selectByNameService({ tennhomquyen });
   if (data.status === 200)
     return res.status(data.status).json({ results: data.results });
@@ -65,6 +64,14 @@ const update = async (req, res) => {
   return res.status(data.status).json({ message: data.message });
 };
 
+const selectById = async (req, res) => {
+  const { id } = req.query;
+  const data = await selectByIdService({ id });
+  if (data.status === 200)
+    return res.status(data.status).json({ results: data.results });
+  return res.status(data.status).json({ message: data.message });
+};
+
 const selectAll = async (req, res) => {
   const data = await selectAllService();
 
@@ -75,4 +82,12 @@ const selectAll = async (req, res) => {
   return res.status(data.status).json({ message: data.message });
 };
 
-module.exports = { insert, remove, select, update, selectByName, selectAll };
+module.exports = {
+  insert,
+  remove,
+  select,
+  update,
+  selectByName,
+  selectAll,
+  selectById,
+};
